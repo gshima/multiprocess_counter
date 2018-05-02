@@ -1,17 +1,22 @@
-/* Contador de palavras
+/* Gabriela Akemi Shima RA135819
+ * EA876 - Lab04
  *
- * Este programa recebera uma serie de caracteres representando palavras em sua
- * entrada. Ao receber um caractere fim de linha ('\n'), deve imprimir na tela o
- * numero de palavras separadas que recebeu e, apos, encerrar.
+ * Este programa recebera uma serie de inteiros em sua entrada. Ao receber
+ * um caractere fim de linha ('\n'), deve imprimir na tela a quantidade de
+ * números primos da lista da entrada.
+ *
  */
 
-#include <stdio.h>
+ #include <stdio.h>
 
-int main() {
+ int main() {
+ int var;
 
-  int x, y;
+   do {
+     scanf("%d", &var);
+     printf("var = %d\n", var);
+     
+   } while(getchar() != '\n');
+   return 0;
 
-  scanf("%d %d\n", &x, &y);
-  printf("%d\n", x + 200);
-  return 0;
-}
+ }
