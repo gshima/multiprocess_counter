@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/mman.h>
+
 #include <unistd.h>
 #include <signal.h>
 
@@ -20,7 +21,7 @@ int verificaPrimo(long unsigned int numero);
 int main() {
   pid_t filho[3];
   long unsigned int num;
-  int qtde = 0, qtde_primos = 0, k = 0, qtde_forks = 4;
+  int qtde_elementos = 0, qtde_primos = 0, qtde_forks = 0;
 
   int protection = PROT_READ | PROT_WRITE;
   int visibility = MAP_SHARED | MAP_ANON;
@@ -31,22 +32,14 @@ int main() {
   numeros = (long unsigned int*) mmap(NULL, sizeof(long unsigned int)*TAMANHO, protection, visibility, 0, 0);
   if ((long unsigned int)numeros==-1) printf("Erro de alocacao!\n");
 
-  int *primos; //vetor que guarda quais numeros sao primos
-  primos = (int*) mmap(NULL, sizeof(int)*TAMANHO, protection, visibility, 0, 0);
-  if ((int)primos==-1) printf("Erro de alocacao!\n");
-  (*primos)=0;
+  long unsigned int *primos; //vetor que guarda os números qtde_primos
+  primos = (long unsigned int*) mmap(NULL, sizeof(long unsigned int)*TAMANHO, protection, visibility, 0, 0);
+  if ((long unsigned int)primos==-1) printf("Erro de alocacao!\n");
 
-  // int *forks; // vetor guarda quais o filhos ativos
-  // forks = (int*) mmap(NULL, sizeof(int)*4, protection, visibility, 0, 0);
-  // if ((int)forks==-1) printf("Erro de alocacao!\n");
-  // for(int i = 0; i < 4; ++i){
-  //   (*forks) = 0;
-  // }
-
-  // int *qtde_forks; //guarda a quantidade de filhos
-  // qtde_forks = (int*) mmap(NULL, sizeof(int), protection, visibility, 0, 0);
-  // if ((int)qtde_forks==-1) printf("Erro de alocacao!\n");
-  // (*qtde_forks) = 4;
+  long unsigned int *forks; //vetor que guarda os forks ativos
+  forks = (long unsigned int*) mmap(NULL, sizeof(long unsigned int)*4, protection, visibility, 0, 0);
+  if ((long unsigned int)forks==-1) printf("Erro de alocacao!\n");
+  for(int j = 0; j < 4; ++j) forks[j] = 0;
 
   int *i; //índice
   i = (int*) mmap(NULL, sizeof(int), protection, visibility, 0, 0);
@@ -56,61 +49,43 @@ int main() {
 
   do { // pega as entradas guarda em numeros na memória compartilhada
     scanf("%lu", &num);
-    *numeros = num;
-    numeros++;
-    qtde++;
-  } while(getchar() != '\n');
+    //*numeros = num;
 
-  numeros = numeros - (qtde);
+    // int achou = 0;
+    // while (achou == 0){
+    //   for(int j = 0; j < 4; ++j){
+    //     if(forks[j] == 0 ) { //processo livre
+    //       achou = 1;
+    //       forks[j] = 1;
+    //       filho[j] = fork(); //processo filho começa aqui
+    //       if(filho[j] == 0) {
+    //         primos[qtde_elementos] = verificaPrimo(num);
+    //         printf("Numero %d é primo? %d\n", num, primos[qtde_elementos]);
+    //         forks[j] = 0;
+    //         exit(EXIT_SUCCESS);
+    //       }
+    //       //break;
+    //     }
+    //   }
+    // }
 
-  while ( (*i) < qtde) {
-    printf("Olar\n");
-    if( (qtde_forks) < 4 ) {
-      qtde_forks ++;
-      filho[qtde_forks-1] = fork();
-      //printf("Entrei no fork?\n");
-      if(filho[qtde_forks-1] == 0) {
-        k = (*i);
-        printf("Entrei no fork? -- Processo Filho: numero = %lu\n", numeros[k]);
-        primos[k] = verificaPrimo(numeros[k]);
-        exit(0);
-      }
-      else {
-        qtde_forks ++;
-        (*i) ++;
-      }
-    }
-    else{
-      /* Espera todos os filhos processarem */
-      for(int j = 0; j < qtde_forks; ++j) {
-        waitpid(filho[j],NULL, 0);
-      }
-      qtde_forks = 0;
-      filho[qtde_forks] = fork();
-      if(filho[qtde_forks] == 0) {
-        k = (*i);
-        printf("Entrei no fork? -- Processo Filho: numero = %lu\n", numeros[k]);
-        primos[k] = verificaPrimo(numeros[k]);
-        exit(0);
-      }
-      else {
-        qtde_forks ++;
-        (*i) ++;
-      }
-    }
-  }
+
+    qtde_primos += verificaPrimo(num);
+    qtde_elementos++;
+  } while(getchar() != '\n' && qtde_elementos < TAMANHO);
+
 
   /* Espera todos os filhos processarem */
-  for(int j = 0; j < qtde_forks; ++j) {
+  for(int j = 0; j < 4; ++j) {
     waitpid(filho[j],NULL, 0);
   }
 
-  /* Soma quantidade de filhos */
-  for(int j = 0; j < qtde ; ++j){
-    if(numeros[j] == 1) qtde_primos++;
+  /* Calcula a quantidade de números primos calculados */
+  for(int j = 0; j < qtde_elementos; ++j){
+    qtde_primos += primos[j];
   }
- //(*qtde_primos) += verificaPrimo(num);
- printf("%d\n", *primos);
+
+ printf("%d\n", qtde_primos);
  return 0;
 }
 
