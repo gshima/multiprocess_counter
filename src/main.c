@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -16,7 +15,20 @@ void sigquit() {
   exit(0);
 }
 
-int verificaPrimo(long unsigned int numero);
+int verificaPrimo(long unsigned int numero) {
+   int divisoes = 0;
+   for(int i = 1; i <= numero; ++i){
+      if(numero%i == 0) {
+         divisoes++;
+      }
+   }
+   if(divisoes == 2){
+      return 1;
+   }
+   else {
+      return 0;
+   }
+}
 
 int main() {
   pid_t filho[3];
@@ -51,26 +63,26 @@ int main() {
     scanf("%lu", &num);
     //*numeros = num;
 
-    // int achou = 0;
-    // while (achou == 0){
-    //   for(int j = 0; j < 4; ++j){
-    //     if(forks[j] == 0 ) { //processo livre
-    //       achou = 1;
-    //       forks[j] = 1;
-    //       filho[j] = fork(); //processo filho começa aqui
-    //       if(filho[j] == 0) {
-    //         primos[qtde_elementos] = verificaPrimo(num);
-    //         printf("Numero %d é primo? %d\n", num, primos[qtde_elementos]);
-    //         forks[j] = 0;
-    //         exit(EXIT_SUCCESS);
-    //       }
-    //       //break;
-    //     }
-    //   }
-    // }
+    int achou = 0;
+    while (achou == 0){
+      for(int j = 0; j < 4; ++j){
+        if(forks[j] == 0 ) { //processo livre
+          achou = 1;
+          forks[j] = 1;
+          filho[j] = fork(); //processo filho começa aqui
+          if(filho[j] == 0) {
+            primos[qtde_elementos] = verificaPrimo(num);
+            //printf("Numero %d é primo? %d\n", num, primos[qtde_elementos]);
+            forks[j] = 0;
+            exit(EXIT_SUCCESS);
+          }
+          break;
+        }
+      }
+    }
 
 
-    qtde_primos += verificaPrimo(num);
+    //qtde_primos += verificaPrimo(num);
     qtde_elementos++;
   } while(getchar() != '\n' && qtde_elementos < TAMANHO);
 
@@ -87,19 +99,4 @@ int main() {
 
  printf("%d\n", qtde_primos);
  return 0;
-}
-
-int verificaPrimo(long unsigned int numero) {
-   int divisoes = 0;
-   for(int i = 1; i <= numero; ++i){
-      if(numero%i == 0) {
-         divisoes++;
-      }
-   }
-   if(divisoes == 2){
-      return 1;
-   }
-   else {
-      return 0;
-   }
 }
